@@ -88,20 +88,20 @@ class Text:
   def __pdf_to_image(self,file_path):
       # using convert_from_path method to access pdf by passing its dstination
       #path and converting into image list.
-    pages = convert_from_path(file_path, poppler_path=directory+"\\poppler-0.68.0\\bin")
+    pages = convert_from_path(file_path, poppler_path=directory+"\\Text\\poppler-0.68.0\\bin")
     return pages
 
   def __image_preprocessing(self,im):
   #im-->PIL image obtained from pdf
   #save image as jpeg file in this notebook
-    im.save(directory+'\\image.jpg', 'JPEG')
+    im.save(directory+'\\Text\\TextD\\image.jpg', 'JPEG')
     '''
     Reading the saved image using opencv imread function.
     imread reads images in BGR format so to convert it into RGB,
     by using cv2.COLOR_BGR2RGB parameter.
     Image is stored in variable img
     '''
-    img=cv2.imread(directory+'\\image.jpg', cv2.COLOR_BGR2RGB )
+    img=cv2.imread(directory+'\\Text\\TextD\\image.jpg', cv2.COLOR_BGR2RGB )
     #print(img.shape)
     # converting the img into grayscale mode, i.e., reducing from 3 channels to 2
     img=cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
@@ -170,7 +170,6 @@ class Text:
         else:
           text=text+" "+self.__extract_text_img(img)
     elif url:
-      print("lol")
       if(url.startswith("http") or url.startswith("www.")) and (url.endswith(".pdf") or url.endswith(".txt") or url.endswith(".docx") or url.endswith(".odt") or url.endswith(".doc")):
         s=url.split('/')
         print(s)
@@ -375,7 +374,7 @@ class Text:
 
 # Build LDA model
     lda_model = LDA(corpus=doc_term_matrix, id2word=dictionary, num_topics=self.no_of_topics, random_state=100,
-                chunksize=1000, passes=2)
+                chunksize=1000, passes=50)
     #pyLDAvis.enable_notebook()
     vis = pyLDAvis.gensim.prepare(lda_model, doc_term_matrix, dictionary)
     pyLDAvis.save_html(vis,directory+"\\templates\\abc.html")

@@ -140,8 +140,15 @@ def fileUpload():
         print("lol",url)
     else:
         text=request.form["text"]
-
-    text_class=Text()
+    
+    scanned=request.form["scanned"]
+    #scanned = request.form.scanned
+    #print(type(scanned))
+    if(scanned=='1'):
+        scanned=True
+    else:
+        scanned=False
+    text_class=Text(scan=scanned)
     text_class.file_path_ext(file_path, url,text)
     a,b,c,d=list(text_class.topic_modelling())
     summary=text_class.extractive_summary()
