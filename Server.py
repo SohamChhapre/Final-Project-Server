@@ -11,7 +11,7 @@ import hashlib
 logging.basicConfig(level=logging.INFO)
 import json
 from flask_sqlalchemy import SQLAlchemy
-
+import validators
 logger = logging.getLogger('HELLO WORLD')
 directory = os.getcwd()
 
@@ -19,9 +19,12 @@ directory = os.getcwd()
 
 '''
 UPLOAD_FOLDER = './Video'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif','.mp4'])
 model=load_model('./Video/saved_model.h5')
 '''
+
+ALLOWED_TEXT_EXTENSIONS = ['txt', 'pdf', 'docx','odt']
+ALLOWED_VIDEO_EXTENSIONS=['mp4','mov','wmv','avi','mkv','gif']
+ALLOWED_AUDIO_EXTENSIONS=['wav']
 app = Flask(__name__)
 import os.path
 
@@ -84,11 +87,11 @@ def login():
     password = hashlib.sha256(password.encode()).hexdigest()
 
     user = User.json(User.query.filter_by(email=email).first())
-    response={'loggedin':'false'}
+    response={'loggedin':'false','msg':"Invalid Username or Password"}
     if user and password==user["password"]:
         response['loggedin']='true'
         response['username']=user['username']
-        print(response)
+        response['msg']="Login Successfully"        
         return response
     else:
         return response
@@ -104,7 +107,7 @@ def add_user():
     print(username,email,password)
     password = hashlib.sha256(password.encode()).hexdigest()
     User.add_user(username, email, password)
-    response = Response("User added", 201, mimetype='application/json')
+    response = Response("User Registered Successfully", 201, mimetype='application/json')
     return response
 
 
@@ -128,30 +131,43 @@ def fileUpload():
     file_path = None
     url=None
     text=None
+    scanned=request.form["scanned"]
+    if(scanned=='1'):
+        scanned=True
+    else:
+        scanned=False
     if(request.files):
         file = request.files['file']
         filename = secure_filename(file.filename)
+        txt_ext=filename.split('.')[-1]
+        if scanned and txt_ext!='pdf':
+            return {'msg':'Only pdf scanned Files are supported'}
+        if txt_ext not in ALLOWED_TEXT_EXTENSIONS:
+            s=",".join(ALLOWED_TEXT_EXTENSIONS)
+            return {'msg':'only ' +s +' files are Supported'} 
+        
+        print("format ?>>>>>>>>>>>>>",filename.split('.')[-1])
         destination="/".join([target, filename])
         print(destination,filename)
         file.save(destination)
         file_path=destination
     elif(request.form["url"]):
         url=request.form["url"]
+        if not validators.url(url):
+            return {'msg':'Invalid URL chcek URL again'}
         print("lol",url)
     else:
         text=request.form["text"]
     
-    scanned=request.form["scanned"]
-    #scanned = request.form.scanned
-    #print(type(scanned))
-    if(scanned=='1'):
-        scanned=True
-    else:
-        scanned=False
+   
+    
     text_class=Text(scan=scanned)
     text_class.file_path_ext(file_path, url,text)
-    a,b,c,d=list(text_class.topic_modelling())
     summary=text_class.extractive_summary()
+    if summary==None:
+        return {'msg':"At least 2 paragraphs are required in Text input"}
+    a,b,c,d=list(text_class.topic_modelling())
+    
     readability=text_class.readability_analysis()
     
     response={'summary':summary,'readability':readability,'topic_modelling':[a,b,c,d]}
@@ -178,6 +194,11 @@ def fileVideoUpload():
     
     file = request.files['file']
     filename = secure_filename(file.filename)
+    video_ext=filename.split('.')[-1]
+    print('>>>>>>>>>>>',filename.split('.')[-1])
+    if video_ext not in ALLOWED_VIDEO_EXTENSIONS:
+        s=",".join(ALLOWED_VIDEO_EXTENSIONS)
+        return {'msg':"Only "+s+ ' are Supported','flag':1}
     destination="/".join([target, filename])
     print(destination,filename)
     file.save(destination)
@@ -210,6 +231,9 @@ def AudioFileUpload():
     if(request.files):
         file = request.files['file']
         filename = secure_filename(file.filename)
+        if filename.split('.')[-1] not in ALLOWED_AUDIO_EXTENSIONS:
+            s=",".join(ALLOWED_AUDIO_EXTENSIONS)
+            return {'msg':"Only "+s+" are allowed",'flag':1}
         destination="/".join([target, filename])
         print(destination,filename)
         file.save(destination)
@@ -217,12 +241,12 @@ def AudioFileUpload():
         ans=Diariazation(file_path,filename)
         return ans
     else :
-        return {"msg":"NO file uploadede"}
+        return {"msg":"No file uploaded"}
 
 
 
 if __name__ == "__main__":
     app.secret_key = os.urandom(24)
-    app.run(debug=True,use_reloader=False)
+    app.run(debug=True,use_reloader=False,host='0.0.0.0')
 
 # CORS(app, expose_headers='Authorization')

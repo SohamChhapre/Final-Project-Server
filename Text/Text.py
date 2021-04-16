@@ -407,4 +407,7 @@ class Text:
 
   #return summary as string
   def extractive_summary(self):
-    return summarize(self.text,ratio=0.5)
+    try:
+      return summarize(self.text,ratio=0.5)
+    except:
+      return None
