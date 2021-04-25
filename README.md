@@ -29,31 +29,50 @@ Know Your Data requires [Python](https://www.python.org/downloads/release/python
 
 Install the dependencies and devDependencies and start the server.
 
-Clonning a Github Repo:
+#### Tessarect OCR installation:
+
+In order to use the Tesseract library, we first need to install it on our system.
+
+To download tesseract ocr for python open the below link in your browser
+
+```sh
+https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-v5.0.0-alpha.20200328.exe
+```
+
+To validate that Tesseract has been successfully installed on your machine, execute the following command:
+
+```sh
+tesseract -v
+```
+
+You should see the Tesseract version printed to your screen, along with a list of image file format libraries Tesseract is compatible with.
+If output is diffrent please ensure that the path of tesseract.exe is set on environment variable, If not set the path in environment variable. 
+
+#### Clonning a Github Repo:
 ```sh
 git clone https://github.com/SohamChhapre/Final-Project-Server.git
 ```
 
-Installing Virtual Enviromnment:
+#### Installing Virtual Enviromnment:
 
 ```sh
 pip install virtualenv
 ```
-Create Virtual Environment :
+#### Create Virtual Environment:
 ```sh
 virtualenv .env
 ```
-Activating Virtual Environment:
+#### Activating Virtual Environment:
 ```sh
 cd path_to_.env/Scripts
 activate
 ```
-Installing dependencies:
+#### Installing dependencies:
 ```sh
 pip install -r requirements.txt
 ```
 
-Running Server:
+#### Running Server:
 ```sh
 python Server.py
 ```
